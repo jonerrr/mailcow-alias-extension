@@ -4,4 +4,4 @@ A Chrome / Firefox extension for creating aliases using Mailcow's API.
 
 ## Disclaimer
 
-This is not complete. Once it is, hopefully it will be on the Chrome and Firefox extension stores.
+This is not complete. Once it is, it will (hopefully) be on the Chrome and Firefox extension stores.
