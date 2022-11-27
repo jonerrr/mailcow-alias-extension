@@ -4,13 +4,22 @@ import {
   Group,
   Text,
   ActionIcon,
-  Anchor,
+  Alert,
   ScrollArea,
   useMantineTheme,
   Tooltip,
   createStyles,
 } from "@mantine/core";
-import { IconPencil, IconTrash, IconInboxOff, IconInbox } from "@tabler/icons";
+import {
+  IconPencil,
+  IconTrash,
+  IconInboxOff,
+  IconInbox,
+  IconAlertCircle,
+  IconCopy
+} from "@tabler/icons";
+import { useStorage } from "@plasmohq/storage/hook";
+import type { UsernameType } from "~options";
 
 export interface Alias {
   id: number;
@@ -90,6 +99,10 @@ function AliasRow({ alias }: { alias: Alias }) {
 export default function AliasTable({ aliases }: { aliases: Alias[] }) {
   const { classes, cx } = useStyles();
   const [scrolled, setScrolled] = useState(false);
+  const [host] = useStorage<string>("host");
+  const [apiKey] = useStorage<string>("apiKey");
+  const [domain] = useStorage<string>("domain");
+  const [usernameType] = useStorage<UsernameType>("usernameType");
 
   const rows = aliases
     .sort((a, b) => b.modified.getTime() - a.modified.getTime())
@@ -100,6 +113,21 @@ export default function AliasTable({ aliases }: { aliases: Alias[] }) {
       sx={{ height: 300 }}
       onScrollPositionChange={({ y }) => setScrolled(y !== 0)}
     >
+      {!host || !apiKey || !domain || !usernameType ? (
+        <Alert
+          icon={<IconAlertCircle size={16} />}
+          title="Error"
+          color="yellow"
+        >
+          Missing initial configuration. Please come back after configuring the{" "}
+          <Text c="blue" component="a" href="/options.html" target="_blank">
+            extension preferences
+          </Text>
+          .
+        </Alert>
+      ) : (
+        ""
+      )}
       <Table sx={{ maxHeight: 400, maxWidth: 800 }} verticalSpacing="xs">
         <thead className={cx(classes.header, { [classes.scrolled]: scrolled })}>
           <tr>

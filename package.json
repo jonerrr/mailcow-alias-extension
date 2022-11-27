@@ -1,9 +1,10 @@
 {
   "name": "mailcow-aliases",
-  "displayName": "Mailcow aliases",
+  "displayName": "Mailcow Aliases",
   "version": "0.0.0",
-  "description": "A basic Plasmo extension.",
+  "description": "Generate Mailcow aliases on the fly!",
   "author": "jonah",
+  "homepage": "https://github.com/jonerrr/mailow-alias-extension/",
   "scripts": {
     "dev": "plasmo dev --target=firefox-mv2",
     "build": "plasmo build",
@@ -15,6 +16,7 @@
     "@mantine/hooks": "^5.8.3",
     "@plasmohq/storage": "^0.13.0",
     "@tabler/icons": "^1.113.0",
+    "axios": "^1.2.0",
     "chance": "^1.1.9",
     "plasmo": "0.59.1",
     "react": "18.2.0",
@@ -32,8 +34,17 @@
     "typescript": "4.9.3"
   },
   "manifest": {
+    "key": "$CRX_PUBLIC_KEY",
+    "permissions": [
+      "tabs"
+    ],
     "host_permissions": [
       "https://*/*"
-    ]
+    ],
+    "browser_specific_settings": {
+      "gecko": {
+        "id": "$FIREFOX_EXT_ID"
+      }
+    }
   }
 }
