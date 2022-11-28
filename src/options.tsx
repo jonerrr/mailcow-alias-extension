@@ -40,7 +40,6 @@ export default function IndexOption() {
   const [loading, setLoading] = useState(false);
   const [fetchError, setError] = useState(false);
   const [domainList, setDomains] = useState<string[]>([]);
-
   const [domain, setDomain] = useStorage("domain");
   const [usernameType, setUsernameType] = useStorage(
     "usernameType",
@@ -52,13 +51,15 @@ export default function IndexOption() {
     (async () => {
       setHost(await storage.get("host"));
       setApiKey(await storage.get("apiKey"));
-      // setTargetAddress(await storage.get("target"));
+      // regex match will complain if target address is null
+      const t = await storage.get("target");
+      if (t) setTargetAddress(t);
     })();
-  });
+  }, []);
 
   const findDomains = async () => {
     try {
-      if (targetAddress.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g))
+      if (!targetAddress.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g))
         throw new Error("Invalid email");
 
       const domains = await axios.get<Domain[]>(
@@ -92,9 +93,9 @@ export default function IndexOption() {
       theme={{ colorScheme: "dark" }}
     >
       <Center>
-        <Paper shadow="xl" m="lg" p="sm" sx={{ width: "50%" }}>
+        <Paper shadow="xl" m="sm" p="sm" sx={{ width: "50%" }}>
           <Stack>
-            <Title>Setup</Title>
+            <Title>Mailcow Setup</Title>
             <Collapse in={fetchError}>
               <Alert
                 icon={<IconAlertCircle size={16} />}
@@ -120,6 +121,7 @@ export default function IndexOption() {
               </Alert>
             </Collapse>
             <TextInput
+              size="lg"
               withAsterisk
               label="Mailcow Host"
               description="Domain name for accessing the mailcow API"
@@ -128,6 +130,7 @@ export default function IndexOption() {
               onChange={(event) => setHost(event.currentTarget.value)}
             />
             <PasswordInput
+              size="lg"
               withAsterisk
               label="API Key"
               description="You can find your mailcow API key in the administrator account (make sure it has read-write access)"
@@ -136,16 +139,11 @@ export default function IndexOption() {
               onChange={(event) => setApiKey(event.currentTarget.value)}
             />
             <TextInput
+              size="lg"
               withAsterisk
               label="Forward Address"
-              description="Target address of generated aliases"
+              description="Emails will be forwarded to this address"
               placeholder="foo@example.tld"
-              // error={
-              //   target.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g) &&
-              //   target !== ""
-              //     ? null
-              //     : "Invalid email"
-              // }
               value={targetAddress}
               onChange={(event) => setTargetAddress(event.currentTarget.value)}
             />
@@ -160,6 +158,7 @@ export default function IndexOption() {
               disabled={
                 apiKey === "" ||
                 host === "" ||
+                targetAddress === "" ||
                 !targetAddress.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g)
               }
               loading={loading}
@@ -167,22 +166,21 @@ export default function IndexOption() {
               Load Domains
             </Button>
             <Collapse in={domainList.length !== 0}>
-              <Title m={10} order={2}>
-                Alias Options
-              </Title>
+              <Title>Alias Options</Title>
               <Select
                 data={domainList}
                 value={domain}
                 onChange={setDomain}
-                label="Alias domain:"
+                label="Alias domain"
                 transition="pop-bottom-left"
                 transitionDuration={80}
                 transitionTimingFunction="ease"
               />
               <Text fz="sm" mt={10}>
-                Generate username with:
+                Generate username with
               </Text>
               <SegmentedControl
+                fullWidth
                 value={usernameType}
                 onChange={setUsernameType}
                 data={[
@@ -195,8 +193,8 @@ export default function IndexOption() {
               <Title order={3} mt={10}>
                 Example Alias
               </Title>
-              <Text>
-                {GenerateUsername(usernameType, "https://example.tld/")}@
+              <Text c="blue">
+                {GenerateUsername(usernameType, "https://mail.google.com/")}@
                 {domain ? domain : domainList[0]}
               </Text>
             </Collapse>

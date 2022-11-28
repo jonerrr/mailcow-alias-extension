@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   Group,
@@ -6,30 +6,39 @@ import {
   ActionIcon,
   Alert,
   ScrollArea,
-  useMantineTheme,
   Tooltip,
   createStyles,
+  CopyButton,
+  Skeleton,
+  Button,
 } from "@mantine/core";
+import { useClipboard } from "@mantine/hooks";
 import {
   IconPencil,
-  IconTrash,
-  IconInboxOff,
-  IconInbox,
   IconAlertCircle,
-  IconCopy
+  IconCopy,
+  IconClipboardCheck,
 } from "@tabler/icons";
 import { useStorage } from "@plasmohq/storage/hook";
 import type { UsernameType } from "~options";
+import { default as axios } from "axios";
+
+import { GenerateUsername } from "./CreateAlias";
 
 export interface Alias {
   id: number;
   domain: string;
-  goto: string;
+  target: string;
   address: string;
-  active: 0 | 1;
+  active: number;
   created: Date;
   modified: Date;
   hidden: boolean;
+}
+
+interface AddAlias {
+  type: string;
+  msg: string[];
 }
 
 const useStyles = createStyles((theme) => ({
@@ -55,8 +64,6 @@ const useStyles = createStyles((theme) => ({
 }));
 
 function AliasRow({ alias }: { alias: Alias }) {
-  const [editing, setEditing] = useState(false);
-
   return (
     <tr key={alias.id}>
       <td>
@@ -70,7 +77,7 @@ function AliasRow({ alias }: { alias: Alias }) {
           strikethrough={alias.active === 0}
           c={alias.active === 0 ? "dimmed" : ""}
         >
-          {alias.goto}
+          {alias.target}
         </Text>
       </td>
 
@@ -79,9 +86,23 @@ function AliasRow({ alias }: { alias: Alias }) {
       </td>
 
       <td className="actions">
-        <Group spacing={0} position="right">
-          <Tooltip label="Edit">
-            <ActionIcon>
+        <Group spacing={4} position="right">
+          <CopyButton value={alias.address}>
+            {({ copied, copy }) => (
+              <Tooltip label={copied ? "Copied" : "Copy"}>
+                <ActionIcon onClick={copy} color="green" variant="light">
+                  {copied ? (
+                    <IconClipboardCheck size={16} />
+                  ) : (
+                    <IconCopy size={16} />
+                  )}
+                </ActionIcon>
+              </Tooltip>
+            )}
+          </CopyButton>
+
+          <Tooltip label="Edi">
+            <ActionIcon color="yellow" variant="light">
               <IconPencil size={16} stroke={1.5} />
             </ActionIcon>
           </Tooltip>
@@ -96,49 +117,165 @@ function AliasRow({ alias }: { alias: Alias }) {
   );
 }
 
-export default function AliasTable({ aliases }: { aliases: Alias[] }) {
-  const { classes, cx } = useStyles();
+export default function AliasTable() {
   const [scrolled, setScrolled] = useState(false);
-  const [host] = useStorage<string>("host");
-  const [apiKey] = useStorage<string>("apiKey");
-  const [domain] = useStorage<string>("domain");
-  const [usernameType] = useStorage<UsernameType>("usernameType");
+  const [loading, setLoading] = useState(false);
+  const [url, setUrl] = useState("");
+  const [status, setStatus] = useState("");
+  const [aliases, setAliases] = useState<Alias[]>([]);
 
-  const rows = aliases
-    .sort((a, b) => b.modified.getTime() - a.modified.getTime())
-    .map((alias) => <AliasRow alias={alias} />);
+  const [host] = useStorage<string>("host", null);
+  const [apiKey] = useStorage<string>("apiKey", null);
+  const [domain] = useStorage<string>("domain", null);
+  const [usernameType] = useStorage<UsernameType>("usernameType", null);
+  const [target] = useStorage("target");
+
+  const clipboard = useClipboard();
+
+  useEffect(() => {
+    chrome.tabs.query(
+      { active: true, windowId: chrome.windows.WINDOW_ID_CURRENT },
+      (t) => setUrl(t[0].url)
+    );
+
+    (async () => {
+      const { data } = await axios.get<
+        {
+          id: number;
+          domain: string;
+          private_comment: string;
+          address: string;
+          active: string;
+          created: string;
+          modified: string;
+          goto: string;
+        }[]
+      >(`${host}/api/v1/get/alias/all`, {
+        headers: { "x-api-key": apiKey },
+      });
+
+      setAliases(
+        data
+          .filter((a) => a.private_comment.startsWith("aliasextension"))
+          .map((a) => {
+            return {
+              id: a.id,
+              domain: a.domain,
+              target: a.goto,
+              address: a.address,
+              active: parseInt(a.active),
+              created: new Date(a.created),
+              modified: new Date(a.created),
+              hidden: false,
+            };
+          })
+      );
+    })();
+  }, [host && apiKey && domain && usernameType]);
+
+  const generateAlias = async () => {
+    try {
+      const addr = `${GenerateUsername(usernameType, url)}@${domain}`;
+
+      const { data } = await axios.post<AddAlias[]>(
+        `${host}/api/v1/add/alias`,
+        {
+          address: addr,
+          goto: target,
+          private_comment: `aliasextension_${new URL(url).hostname}`,
+          active: "1",
+        },
+        { headers: { "x-api-key": apiKey } }
+      );
+
+      if (data[0].type !== "success") {
+        setStatus("error");
+        return setTimeout(() => setStatus(""), 4000);
+      }
+
+      setAliases([
+        ...aliases,
+        {
+          id: parseInt(data[0].msg.pop()),
+          domain: domain,
+          target,
+          address: addr,
+          active: 1,
+          created: new Date(),
+          modified: new Date(),
+          hidden: false,
+        },
+      ]);
+
+      clipboard.copy(addr);
+      setStatus("success");
+      return setTimeout(() => setStatus(""), 4000);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const { classes, cx } = useStyles();
 
   return (
-    <ScrollArea
-      sx={{ height: 300 }}
-      onScrollPositionChange={({ y }) => setScrolled(y !== 0)}
-    >
-      {!host || !apiKey || !domain || !usernameType ? (
-        <Alert
-          icon={<IconAlertCircle size={16} />}
-          title="Error"
-          color="yellow"
+    <>
+      <Group position="apart" grow sx={{ maxWidth: 800 }}>
+        <Button
+          mb={10}
+          variant="light"
+          color={status === "error" ? "red" : status === "" ? "cyan" : "green"}
+          loading={loading}
+          onClick={generateAlias}
         >
-          Missing initial configuration. Please come back after configuring the{" "}
-          <Text c="blue" component="a" href="/options.html" target="_blank">
-            extension preferences
-          </Text>
-          .
-        </Alert>
-      ) : (
-        ""
-      )}
-      <Table sx={{ maxHeight: 400, maxWidth: 800 }} verticalSpacing="xs">
-        <thead className={cx(classes.header, { [classes.scrolled]: scrolled })}>
-          <tr>
-            <th>Alias</th>
-            <th>Target</th>
-            <th>Modified</th>
-            <th />
-          </tr>
-        </thead>
-        <tbody>{rows}</tbody>
-      </Table>
-    </ScrollArea>
+          {status === "error"
+            ? "Error Generating Alias!"
+            : status === ""
+            ? "Generate Alias"
+            : "Alias Successfully Generated"}
+        </Button>
+      </Group>
+      <ScrollArea
+        sx={{ height: 300 }}
+        onScrollPositionChange={({ y }) => setScrolled(y !== 0)}
+        offsetScrollbars
+      >
+        {!host || !apiKey || !domain || !usernameType ? (
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            title="Error"
+            color="yellow"
+          >
+            Missing initial configuration. Please come back after configuring
+            the{" "}
+            <Text c="blue" component="a" href="/options.html" target="_blank">
+              extension preferences
+            </Text>
+            .
+          </Alert>
+        ) : (
+          ""
+        )}
+
+        <Table sx={{ maxHeight: 400, maxWidth: 800 }} verticalSpacing="xs">
+          <thead
+            className={cx(classes.header, { [classes.scrolled]: scrolled })}
+          >
+            <tr>
+              <th>Alias</th>
+              <th>Target</th>
+              <th>Modified</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {aliases.length === 0
+              ? ""
+              : aliases
+                  .sort((a, b) => b.modified.getTime() - a.modified.getTime())
+                  .map((alias) => <AliasRow alias={alias} />)}
+          </tbody>
+        </Table>
+      </ScrollArea>
+    </>
   );
 }
