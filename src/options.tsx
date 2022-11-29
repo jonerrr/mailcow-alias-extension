@@ -19,7 +19,7 @@ import {
 } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons";
 
-import { GenerateUsername } from "~Components/CreateAlias";
+import { GenerateUsername } from "~Components/AliasTable";
 
 export enum UsernameType {
   Characters = "c",

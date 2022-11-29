@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Chance from "chance";
 import {
   Table,
   Group,
@@ -9,21 +10,21 @@ import {
   Tooltip,
   createStyles,
   CopyButton,
-  Skeleton,
   Button,
 } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";
 import {
-  IconPencil,
   IconAlertCircle,
   IconCopy,
   IconClipboardCheck,
+  IconTrash,
+  IconInbox,
+  IconInboxOff,
+  IconSettings,
 } from "@tabler/icons";
 import { useStorage } from "@plasmohq/storage/hook";
-import type { UsernameType } from "~options";
+import { UsernameType } from "~options";
 import { default as axios } from "axios";
-
-import { GenerateUsername } from "./CreateAlias";
 
 export interface Alias {
   id: number;
@@ -36,9 +37,34 @@ export interface Alias {
   hidden: boolean;
 }
 
-interface AddAlias {
+interface AliasData {
   type: string;
   msg: string[];
+}
+
+const chance = new Chance();
+
+export function GenerateUsername(usernameType: UsernameType, url?: string) {
+  switch (usernameType) {
+    case UsernameType.Characters:
+      return chance.string({ length: 20, alpha: true, numeric: true });
+    case UsernameType.Name:
+      return (
+        (
+          chance.first() +
+          chance.last() +
+          chance.integer({ min: 10, max: 1000 })
+        )
+          // i don't trust chance
+          .replace(/[^a-zA-Z0-9]/g, "")
+      );
+    // there might be some website that turns into an invalid domain name idk
+    case UsernameType.Website:
+      return (
+        new URL(url).hostname.replaceAll(".", "-") +
+        chance.integer({ min: 10, max: 1000 })
+      ).substring(0, 64);
+  }
 }
 
 const useStyles = createStyles((theme) => ({
@@ -63,11 +89,25 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-function AliasRow({ alias }: { alias: Alias }) {
+function AliasRow({
+  alias,
+  updateAlias,
+}: {
+  alias: Alias;
+  updateAlias: Function;
+}) {
+  //TODO error handling (maybe)
+  const [error, setError] = useState(false);
+
   return (
     <tr key={alias.id}>
       <td>
-        <Text size="md" weight={500}>
+        <Text
+          size="md"
+          weight={500}
+          strikethrough={alias.active === 0}
+          c={alias.active === 0 ? "dimmed" : ""}
+        >
           {alias.address}
         </Text>
       </td>
@@ -90,7 +130,11 @@ function AliasRow({ alias }: { alias: Alias }) {
           <CopyButton value={alias.address}>
             {({ copied, copy }) => (
               <Tooltip label={copied ? "Copied" : "Copy"}>
-                <ActionIcon onClick={copy} color="green" variant="light">
+                <ActionIcon
+                  onClick={copy}
+                  color={copied ? "lime" : "teal"}
+                  variant="light"
+                >
                   {copied ? (
                     <IconClipboardCheck size={16} />
                   ) : (
@@ -101,16 +145,36 @@ function AliasRow({ alias }: { alias: Alias }) {
             )}
           </CopyButton>
 
-          <Tooltip label="Edi">
-            <ActionIcon color="yellow" variant="light">
-              <IconPencil size={16} stroke={1.5} />
+          <Tooltip label={alias.active === 1 ? "Disable" : "Enable"}>
+            <ActionIcon
+              color={alias.active === 1 ? "yellow" : "lime"}
+              variant="light"
+              onClick={() =>
+                updateAlias(alias.id, alias.active === 1 ? "disable" : "enable")
+              }
+            >
+              {error ? (
+                <IconAlertCircle size={16} stroke={1.5} />
+              ) : alias.active === 1 ? (
+                <IconInboxOff size={16} stroke={1.5} />
+              ) : (
+                <IconInbox size={16} stroke={1.5} />
+              )}
             </ActionIcon>
           </Tooltip>
-          {/* <Tooltip label="Delete">
-          <ActionIcon color="red">
-            <IconTrash size={16} stroke={1.5} />
-          </ActionIcon>
-        </Tooltip> */}
+          <Tooltip label="Delete">
+            <ActionIcon
+              color="red"
+              variant="light"
+              onClick={() => updateAlias(alias.id, "delete")}
+            >
+              {error ? (
+                <IconAlertCircle size={16} stroke={1.5} />
+              ) : (
+                <IconTrash size={16} stroke={1.5} />
+              )}
+            </ActionIcon>
+          </Tooltip>
         </Group>
       </td>
     </tr>
@@ -147,7 +211,8 @@ export default function AliasTable() {
           address: string;
           active: string;
           created: string;
-          modified: string;
+          // TODO broken
+          // modified: string;
           goto: string;
         }[]
       >(`${host}/api/v1/get/alias/all`, {
@@ -164,8 +229,8 @@ export default function AliasTable() {
               target: a.goto,
               address: a.address,
               active: parseInt(a.active),
-              created: new Date(a.created),
-              modified: new Date(a.created),
+              created: new Date(`${a.created}.000Z`),
+              modified: new Date(`${a.created}.000Z`),
               hidden: false,
             };
           })
@@ -177,7 +242,7 @@ export default function AliasTable() {
     try {
       const addr = `${GenerateUsername(usernameType, url)}@${domain}`;
 
-      const { data } = await axios.post<AddAlias[]>(
+      const { data } = await axios.post<AliasData[]>(
         `${host}/api/v1/add/alias`,
         {
           address: addr,
@@ -188,10 +253,7 @@ export default function AliasTable() {
         { headers: { "x-api-key": apiKey } }
       );
 
-      if (data[0].type !== "success") {
-        setStatus("error");
-        return setTimeout(() => setStatus(""), 4000);
-      }
+      if (data[0].type !== "success") throw new Error("Failed to create alias");
 
       setAliases([
         ...aliases,
@@ -212,6 +274,37 @@ export default function AliasTable() {
       return setTimeout(() => setStatus(""), 4000);
     } catch (e) {
       console.error(e);
+      setStatus("error");
+      return setTimeout(() => setStatus(""), 4000);
+    }
+  };
+
+  const updateAlias = async (
+    id: number,
+    op: "delete" | "disable" | "enable"
+  ) => {
+    try {
+      const { data } = await axios.post<AliasData[]>(
+        `${host}/api/v1/${op === "delete" ? "delete" : "edit"}/alias`,
+        op === "delete"
+          ? [id]
+          : { attr: { active: op === "disable" ? "0" : "1" }, items: [id] },
+        { headers: { "x-api-key": apiKey } }
+      );
+
+      if (data[0].type !== "success") throw new Error("Failed to update alias");
+
+      op === "delete"
+        ? setAliases(aliases.filter((a) => a.id !== id))
+        : setAliases(
+            aliases.map((a) => {
+              if (a.id === id) a.active = op === "disable" ? 0 : 1;
+              return a;
+            })
+          );
+    } catch (e) {
+      //TODO better error handling
+      console.error(e);
     }
   };
 
@@ -219,21 +312,6 @@ export default function AliasTable() {
 
   return (
     <>
-      <Group position="apart" grow sx={{ maxWidth: 800 }}>
-        <Button
-          mb={10}
-          variant="light"
-          color={status === "error" ? "red" : status === "" ? "cyan" : "green"}
-          loading={loading}
-          onClick={generateAlias}
-        >
-          {status === "error"
-            ? "Error Generating Alias!"
-            : status === ""
-            ? "Generate Alias"
-            : "Alias Successfully Generated"}
-        </Button>
-      </Group>
       <ScrollArea
         sx={{ height: 300 }}
         onScrollPositionChange={({ y }) => setScrolled(y !== 0)}
@@ -253,7 +331,27 @@ export default function AliasTable() {
             .
           </Alert>
         ) : (
-          ""
+          <Group position="apart" grow sx={{ maxWidth: 800 }}>
+            <Button
+              mb={10}
+              variant="light"
+              color={
+                status === "error" ? "red" : status === "" ? "grape" : "green"
+              }
+              loading={loading}
+              onClick={() => {
+                setLoading(true);
+                generateAlias();
+                setLoading(false);
+              }}
+            >
+              {status === "error"
+                ? "Error Generating Alias!"
+                : status === ""
+                ? "Generate Alias"
+                : "Alias Successfully Generated"}
+            </Button>
+          </Group>
         )}
 
         <Table sx={{ maxHeight: 400, maxWidth: 800 }} verticalSpacing="xs">
@@ -264,15 +362,27 @@ export default function AliasTable() {
               <th>Alias</th>
               <th>Target</th>
               <th>Modified</th>
-              <th />
+              <th style={{ float: "right" }}>
+                <Tooltip label="Settings">
+                  <ActionIcon
+                    component="a"
+                    href="/options.html"
+                    target="_blank"
+                  >
+                    <IconSettings size={18} stroke={1.5} />
+                  </ActionIcon>
+                </Tooltip>
+              </th>
             </tr>
           </thead>
           <tbody>
             {aliases.length === 0
               ? ""
               : aliases
-                  .sort((a, b) => b.modified.getTime() - a.modified.getTime())
-                  .map((alias) => <AliasRow alias={alias} />)}
+                  .sort((a, b) => b.created.getTime() - a.created.getTime())
+                  .map((alias) => (
+                    <AliasRow alias={alias} updateAlias={updateAlias} />
+                  ))}
           </tbody>
         </Table>
       </ScrollArea>

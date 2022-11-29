@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
-    "@mantine/core": "^5.8.3",
-    "@mantine/hooks": "^5.8.3",
+    "@mantine/core": "^5.8.4",
+    "@mantine/hooks": "^5.8.4",
     "@plasmohq/storage": "^0.13.0",
-    "@tabler/icons": "^1.113.0",
+    "@tabler/icons": "^1.114.0",
     "axios": "^1.2.0",
     "chance": "^1.1.9",
     "plasmo": "0.59.1",
@@ -34,8 +34,12 @@
   },
   "manifest": {
     "key": "$CRX_PUBLIC_KEY",
-    "permissions": ["tabs"],
-    "host_permissions": ["https://*/*"],
+    "permissions": [
+      "tabs"
+    ],
+    "host_permissions": [
+      "https://*/*"
+    ],
     "browser_specific_settings": {
       "gecko": {
         "id": "$FIREFOX_EXT_ID"
