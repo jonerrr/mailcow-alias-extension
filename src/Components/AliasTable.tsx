@@ -73,7 +73,7 @@ const useStyles = createStyles((theme) => ({
     top: 0,
     backgroundColor: theme.colors.dark[7],
     transition: "box-shadow 150ms ease",
-
+    zIndex: 1,
     "&::after": {
       content: '""',
       position: "absolute",
@@ -312,49 +312,51 @@ export default function AliasTable() {
 
   return (
     <>
+      {!host || !apiKey || !domain || !usernameType ? (
+        <Alert
+          icon={<IconAlertCircle size={16} />}
+          title="Error"
+          color="yellow"
+        >
+          Missing initial configuration. Please come back after configuring the{" "}
+          <Text c="blue" component="a" href="/options.html" target="_blank">
+            extension preferences
+          </Text>
+          .
+        </Alert>
+      ) : (
+        <Group position="apart" grow sx={{ maxWidth: 800 }}>
+          <Button
+            mb={10}
+            variant="light"
+            color={
+              status === "error" ? "red" : status === "" ? "grape" : "green"
+            }
+            loading={loading}
+            onClick={() => {
+              setLoading(true);
+              generateAlias();
+              setLoading(false);
+            }}
+          >
+            {status === "error"
+              ? "Error Generating Alias!"
+              : status === ""
+              ? "Generate Alias"
+              : "Alias Successfully Generated"}
+          </Button>
+        </Group>
+      )}
+
       <ScrollArea
         sx={{ height: 300 }}
         onScrollPositionChange={({ y }) => setScrolled(y !== 0)}
         offsetScrollbars
       >
-        {!host || !apiKey || !domain || !usernameType ? (
-          <Alert
-            icon={<IconAlertCircle size={16} />}
-            title="Error"
-            color="yellow"
-          >
-            Missing initial configuration. Please come back after configuring
-            the{" "}
-            <Text c="blue" component="a" href="/options.html" target="_blank">
-              extension preferences
-            </Text>
-            .
-          </Alert>
-        ) : (
-          <Group position="apart" grow sx={{ maxWidth: 800 }}>
-            <Button
-              mb={10}
-              variant="light"
-              color={
-                status === "error" ? "red" : status === "" ? "grape" : "green"
-              }
-              loading={loading}
-              onClick={() => {
-                setLoading(true);
-                generateAlias();
-                setLoading(false);
-              }}
-            >
-              {status === "error"
-                ? "Error Generating Alias!"
-                : status === ""
-                ? "Generate Alias"
-                : "Alias Successfully Generated"}
-            </Button>
-          </Group>
-        )}
-
-        <Table sx={{ maxHeight: 400, maxWidth: 800 }} verticalSpacing="xs">
+        <Table
+          sx={{ maxHeight: 400, maxWidth: 800, isolation: "isolate" }}
+          verticalSpacing="xs"
+        >
           <thead
             className={cx(classes.header, { [classes.scrolled]: scrolled })}
           >
@@ -363,7 +365,7 @@ export default function AliasTable() {
               <th>Target</th>
               <th>Modified</th>
               <th style={{ float: "right" }}>
-                <Tooltip label="Settings">
+                <Tooltip label="Settings" position="left">
                   <ActionIcon
                     component="a"
                     href="/options.html"

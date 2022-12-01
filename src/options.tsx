@@ -59,8 +59,8 @@ export default function IndexOption() {
 
   const findDomains = async () => {
     try {
-      if (!targetAddress.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g))
-        throw new Error("Invalid email");
+      // if (!targetAddress.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g))
+      //   throw new Error("Invalid email");
 
       const domains = await axios.get<Domain[]>(
         `${host}/api/v1/get/domain/all`,
@@ -159,7 +159,8 @@ export default function IndexOption() {
                 apiKey === "" ||
                 host === "" ||
                 targetAddress === "" ||
-                !targetAddress.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g)
+                !targetAddress.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g) ||
+                !apiKey.match(/([\w]{6}-){4}[\w]{6}$/g)
               }
               loading={loading}
             >
