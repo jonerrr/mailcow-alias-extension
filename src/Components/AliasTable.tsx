@@ -25,6 +25,7 @@ import {
 import { useStorage } from "@plasmohq/storage/hook";
 import { UsernameType } from "~options";
 import { default as axios } from "axios";
+import { addAbortSignal } from "stream";
 
 export interface Alias {
   id: number;
@@ -100,7 +101,7 @@ function AliasRow({
   const [error, setError] = useState(false);
 
   return (
-    <tr key={alias.id}>
+    <tr key={alias.id.toString()}>
       <td>
         <Text
           size="md"
@@ -202,41 +203,47 @@ export default function AliasTable() {
       (t) => setUrl(t[0].url)
     );
 
-    (async () => {
-      const { data } = await axios.get<
-        {
-          id: number;
-          domain: string;
-          private_comment: string;
-          address: string;
-          active: string;
-          created: string;
-          // TODO broken
-          // modified: string;
-          goto: string;
-        }[]
-      >(`${host}/api/v1/get/alias/all`, {
-        headers: { "x-api-key": apiKey },
-      });
-
-      setAliases(
-        data
-          .filter((a) => a.private_comment.startsWith("aliasextension"))
-          .map((a) => {
-            return {
-              id: a.id,
-              domain: a.domain,
-              target: a.goto,
-              address: a.address,
-              active: parseInt(a.active),
-              created: new Date(`${a.created}.000Z`),
-              modified: new Date(`${a.created}.000Z`),
-              hidden: false,
-            };
-          })
-      );
-    })();
-  }, [host && apiKey && domain && usernameType]);
+    if (host && apiKey && domain && usernameType) {
+      (async () => {
+        const { data } = await axios.get<
+          {
+            id: number;
+            domain: string;
+            private_comment: string | null;
+            address: string;
+            active: string;
+            created: string;
+            // TODO broken
+            // modified: string;
+            goto: string;
+          }[]
+        >(`${host}/api/v1/get/alias/all`, {
+          headers: { "x-api-key": apiKey },
+        });
+        console.log(data);
+        setAliases(
+          data
+            .filter(
+              (a) =>
+                a.private_comment &&
+                a.private_comment.startsWith("aliasextension")
+            )
+            .map((a) => {
+              return {
+                id: a.id,
+                domain: a.domain,
+                target: a.goto,
+                address: a.address,
+                active: parseInt(a.active),
+                created: new Date(`${a.created}.000Z`),
+                modified: new Date(`${a.created}.000Z`),
+                hidden: false,
+              };
+            })
+        );
+      })();
+    }
+  }, []);
 
   const generateAlias = async () => {
     try {
@@ -325,7 +332,7 @@ export default function AliasTable() {
           .
         </Alert>
       ) : (
-        <Group position="apart" grow sx={{ maxWidth: 800 }}>
+        <Group position="apart" grow>
           <Button
             mb={10}
             variant="light"
@@ -378,13 +385,11 @@ export default function AliasTable() {
             </tr>
           </thead>
           <tbody>
-            {aliases.length === 0
-              ? ""
-              : aliases
-                  .sort((a, b) => b.created.getTime() - a.created.getTime())
-                  .map((alias) => (
-                    <AliasRow alias={alias} updateAlias={updateAlias} />
-                  ))}
+            {aliases
+              .sort((a, b) => b.created.getTime() - a.created.getTime())
+              .map((alias) => (
+                <AliasRow alias={alias} updateAlias={updateAlias} />
+              ))}
           </tbody>
         </Table>
       </ScrollArea>

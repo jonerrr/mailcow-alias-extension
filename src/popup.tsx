@@ -9,7 +9,11 @@ export default function IndexPopup() {
       withNormalizeCSS
       theme={{ colorScheme: "dark" }}
     >
-      <Paper shadow="xl" p="sm">
+      <Paper
+        shadow="xl"
+        p="sm"
+        sx={{ maxWidth: 800, maxHeight: 300, minWidth: 700 }}
+      >
         <AliasTable />
       </Paper>
     </MantineProvider>

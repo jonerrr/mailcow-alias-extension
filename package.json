@@ -6,7 +6,7 @@
   "author": "jonah",
   "homepage": "https://github.com/jonerrr/mailow-alias-extension/",
   "scripts": {
-    "dev": "plasmo dev --target=firefox-mv2",
+    "dev": "plasmo dev",
     "build": "plasmo build",
     "package": "plasmo package"
   },

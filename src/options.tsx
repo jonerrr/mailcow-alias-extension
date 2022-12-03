@@ -34,9 +34,9 @@ interface Domain {
 }
 
 export default function IndexOption() {
-  const [host, setHost] = useState("");
-  const [apiKey, setApiKey] = useState("");
-  const [targetAddress, setTargetAddress] = useState("");
+  const [host, setHost] = useState<string>("");
+  const [apiKey, setApiKey] = useState<string>("");
+  const [targetAddress, setTargetAddress] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [fetchError, setError] = useState(false);
   const [domainList, setDomains] = useState<string[]>([]);
@@ -49,19 +49,17 @@ export default function IndexOption() {
 
   useEffect(() => {
     (async () => {
-      setHost(await storage.get("host"));
-      setApiKey(await storage.get("apiKey"));
-      // regex match will complain if target address is null
+      const h = await storage.get("host");
+      const a = await storage.get("apiKey");
       const t = await storage.get("target");
+      if (h) setHost(h);
+      if (a) setApiKey(a);
       if (t) setTargetAddress(t);
     })();
   }, []);
 
   const findDomains = async () => {
     try {
-      // if (!targetAddress.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g))
-      //   throw new Error("Invalid email");
-
       const domains = await axios.get<Domain[]>(
         `${host}/api/v1/get/domain/all`,
         {
@@ -124,7 +122,7 @@ export default function IndexOption() {
               size="lg"
               withAsterisk
               label="Mailcow Host"
-              description="Domain name for accessing the mailcow API"
+              description="The domain used for accessing the mailcow API"
               placeholder="https://mail.example.com"
               value={host}
               onChange={(event) => setHost(event.currentTarget.value)}
@@ -133,7 +131,7 @@ export default function IndexOption() {
               size="lg"
               withAsterisk
               label="API Key"
-              description="You can find your mailcow API key in the administrator account (make sure it has read-write access)"
+              description="You can enable the mailcow API in an administrator account. Make sure the API key has read and write access."
               placeholder="XXXXXX-XXXXXX-XXXXXX-XXXXXX-XXXXXX"
               value={apiKey}
               onChange={(event) => setApiKey(event.currentTarget.value)}
@@ -142,7 +140,7 @@ export default function IndexOption() {
               size="lg"
               withAsterisk
               label="Forward Address"
-              description="Emails will be forwarded to this address"
+              description="Emails will be forwarded to this address. This must be an email in mailcow."
               placeholder="foo@example.tld"
               value={targetAddress}
               onChange={(event) => setTargetAddress(event.currentTarget.value)}
@@ -159,8 +157,11 @@ export default function IndexOption() {
                 apiKey === "" ||
                 host === "" ||
                 targetAddress === "" ||
-                !targetAddress.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g) ||
-                !apiKey.match(/([\w]{6}-){4}[\w]{6}$/g)
+                !apiKey.match(/^([\w]{6}-){4}[\w]{6}$/g) ||
+                !host.match(
+                  /^(https?:\/\/)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/gi
+                ) ||
+                !targetAddress.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,6}$/g)
               }
               loading={loading}
             >
@@ -177,7 +178,7 @@ export default function IndexOption() {
                 transitionDuration={80}
                 transitionTimingFunction="ease"
               />
-              <Text fz="sm" mt={10}>
+              <Text fz="sm" fw={500} mt={10}>
                 Generate username with
               </Text>
               <SegmentedControl
