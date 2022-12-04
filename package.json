@@ -1,7 +1,7 @@
 {
   "name": "mailcow-aliases",
   "displayName": "Mailcow Aliases",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate Mailcow aliases on the fly!",
   "author": "jonah",
   "homepage": "https://github.com/jonerrr/mailow-alias-extension/",

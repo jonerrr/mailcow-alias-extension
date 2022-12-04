@@ -25,7 +25,7 @@ import {
 import { useStorage } from "@plasmohq/storage/hook";
 import { UsernameType } from "~options";
 import { default as axios } from "axios";
-import { addAbortSignal } from "stream";
+import { Storage } from "@plasmohq/storage";
 
 export interface Alias {
   id: number;
@@ -188,12 +188,13 @@ export default function AliasTable() {
   const [url, setUrl] = useState("");
   const [status, setStatus] = useState("");
   const [aliases, setAliases] = useState<Alias[]>([]);
+  const [host, setHost] = useState<string>();
+  const [apiKey, setApiKey] = useState<string>();
+  const [domain, setDomain] = useState<string>();
+  const [usernameType, setUsernameType] = useState<UsernameType>();
+  const [target, setTarget] = useState<string>();
 
-  const [host] = useStorage<string>("host", null);
-  const [apiKey] = useStorage<string>("apiKey", null);
-  const [domain] = useStorage<string>("domain", null);
-  const [usernameType] = useStorage<UsernameType>("usernameType", null);
-  const [target] = useStorage("target");
+  const storage = new Storage();
 
   const clipboard = useClipboard();
 
@@ -203,46 +204,57 @@ export default function AliasTable() {
       (t) => setUrl(t[0].url)
     );
 
-    if (host && apiKey && domain && usernameType) {
-      (async () => {
-        const { data } = await axios.get<
-          {
-            id: number;
-            domain: string;
-            private_comment: string | null;
-            address: string;
-            active: string;
-            created: string;
-            // TODO broken
-            // modified: string;
-            goto: string;
-          }[]
-        >(`${host}/api/v1/get/alias/all`, {
-          headers: { "x-api-key": apiKey },
-        });
-        console.log(data);
-        setAliases(
-          data
-            .filter(
-              (a) =>
-                a.private_comment &&
-                a.private_comment.startsWith("aliasextension")
-            )
-            .map((a) => {
-              return {
-                id: a.id,
-                domain: a.domain,
-                target: a.goto,
-                address: a.address,
-                active: parseInt(a.active),
-                created: new Date(`${a.created}.000Z`),
-                modified: new Date(`${a.created}.000Z`),
-                hidden: false,
-              };
-            })
-        );
-      })();
-    }
+    (async () => {
+      const h = await storage.get("host");
+      const a = await storage.get("apiKey");
+      const t = await storage.get("target");
+      const u = await storage.get<UsernameType>("usernameType");
+      const d = await storage.get("domain");
+
+      setHost(h);
+      setApiKey(a);
+      setTarget(t);
+      setUsernameType(u);
+      setDomain(d);
+
+      if (!h || !a || !t || !u || !d) return;
+      const { data } = await axios.get<
+        {
+          id: number;
+          domain: string;
+          private_comment: string | null;
+          address: string;
+          active: string;
+          created: string;
+          // TODO broken
+          // modified: string;
+          goto: string;
+        }[]
+      >(`${h}/api/v1/get/alias/all`, {
+        headers: { "x-api-key": a },
+      });
+
+      setAliases(
+        data
+          .filter(
+            (a) =>
+              a.private_comment &&
+              a.private_comment.startsWith("aliasextension")
+          )
+          .map((a) => {
+            return {
+              id: a.id,
+              domain: a.domain,
+              target: a.goto,
+              address: a.address,
+              active: parseInt(a.active),
+              created: new Date(`${a.created}.000Z`),
+              modified: new Date(`${a.created}.000Z`),
+              hidden: false,
+            };
+          })
+      );
+    })();
   }, []);
 
   const generateAlias = async () => {
