@@ -1,14 +1,13 @@
 {
   "name": "mailcow-aliases",
   "displayName": "Mailcow Aliases",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Generate Mailcow aliases on the fly!",
   "author": "jonah",
   "homepage": "https://github.com/jonerrr/mailow-alias-extension/",
   "scripts": {
     "dev": "plasmo dev",
-    "build": "plasmo build",
-    "package": "plasmo package"
+    "build": "plasmo build"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
@@ -33,7 +32,6 @@
     "typescript": "4.9.3"
   },
   "manifest": {
-    "key": "$CRX_PUBLIC_KEY",
     "permissions": [
       "tabs"
     ],
