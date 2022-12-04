@@ -22,7 +22,6 @@ import {
   IconInboxOff,
   IconSettings,
 } from "@tabler/icons";
-import { useStorage } from "@plasmohq/storage/hook";
 import { UsernameType } from "~options";
 import { default as axios } from "axios";
 import { Storage } from "@plasmohq/storage";
@@ -67,28 +66,6 @@ export function GenerateUsername(usernameType: UsernameType, url?: string) {
       ).substring(0, 64);
   }
 }
-
-const useStyles = createStyles((theme) => ({
-  header: {
-    position: "sticky",
-    top: 0,
-    backgroundColor: theme.colors.dark[7],
-    transition: "box-shadow 150ms ease",
-    zIndex: 1,
-    "&::after": {
-      content: '""',
-      position: "absolute",
-      left: 0,
-      right: 0,
-      bottom: 0,
-      borderBottom: `1px solid ${theme.colors.dark[3]}`,
-    },
-  },
-
-  scrolled: {
-    boxShadow: theme.shadows.sm,
-  },
-}));
 
 function AliasRow({
   alias,
@@ -182,6 +159,28 @@ function AliasRow({
   );
 }
 
+const useStyles = createStyles((theme) => ({
+  header: {
+    position: "sticky",
+    top: 0,
+    backgroundColor: theme.colors.dark[7],
+    transition: "box-shadow 150ms ease",
+    zIndex: 1,
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderBottom: `1px solid ${theme.colors.dark[3]}`,
+    },
+  },
+
+  scrolled: {
+    boxShadow: theme.shadows.sm,
+  },
+}));
+
 export default function AliasTable() {
   const [scrolled, setScrolled] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -194,9 +193,9 @@ export default function AliasTable() {
   const [usernameType, setUsernameType] = useState<UsernameType>();
   const [target, setTarget] = useState<string>();
 
-  const storage = new Storage();
-
   const clipboard = useClipboard();
+  const { classes, cx } = useStyles();
+  const storage = new Storage();
 
   useEffect(() => {
     chrome.tabs.query(
@@ -327,8 +326,6 @@ export default function AliasTable() {
     }
   };
 
-  const { classes, cx } = useStyles();
-
   return (
     <>
       {!host || !apiKey || !domain || !usernameType ? (
@@ -344,29 +341,29 @@ export default function AliasTable() {
           .
         </Alert>
       ) : (
-        <Group position="apart" grow>
-          <Button
-            mb={10}
-            variant="light"
-            color={
-              status === "error" ? "red" : status === "" ? "grape" : "green"
-            }
-            loading={loading}
-            onClick={() => {
-              setLoading(true);
-              generateAlias();
-              setLoading(false);
-            }}
-          >
-            {status === "error"
-              ? "Error Generating Alias!"
-              : status === ""
-              ? "Generate Alias"
-              : "Alias Successfully Generated"}
-          </Button>
-        </Group>
+        <Button
+          mb={10}
+          sx={{
+            width: "100%",
+            isolation: "isolate",
+            zIndex: 1,
+          }}
+          variant="light"
+          color={status === "error" ? "red" : status === "" ? "grape" : "green"}
+          loading={loading}
+          onClick={() => {
+            setLoading(true);
+            generateAlias();
+            setLoading(false);
+          }}
+        >
+          {status === "error"
+            ? "Error Generating Alias!"
+            : status === ""
+            ? "Generate Alias"
+            : "Alias Successfully Generated"}
+        </Button>
       )}
-
       <ScrollArea
         sx={{ height: 300 }}
         onScrollPositionChange={({ y }) => setScrolled(y !== 0)}

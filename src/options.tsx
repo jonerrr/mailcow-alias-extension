@@ -104,8 +104,8 @@ export default function IndexOption() {
                 Failed to fetch list of domains from mailcow. Make sure your API
                 key, host, and target address are valid.
                 <Text c="dimmed">
-                  If you're sure its not your fault, check the console for more
-                  details. You can create a GitHub issue{" "}
+                  Check the console for more details. If you're sure its not
+                  your fault, you can create a GitHub issue{" "}
                   <Text
                     c="blue"
                     component="a"
