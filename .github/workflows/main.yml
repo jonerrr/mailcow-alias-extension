@@ -1,0 +1,13 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Browser Platform Publisher
+        uses: PlasmoHQ/bpp@v3.1.0
+        with:
+          keys: ${{ secrets.BPP_KEYS }}
+    
