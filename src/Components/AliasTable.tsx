@@ -321,8 +321,9 @@ export default function AliasTable() {
             })
           );
     } catch (e) {
-      //TODO better error handling
       console.error(e);
+      setStatus("error");
+      return setTimeout(() => setStatus(""), 4000);
     }
   };
 
