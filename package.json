@@ -7,17 +7,18 @@
   "homepage": "https://github.com/jonerrr/mailow-alias-extension/",
   "scripts": {
     "dev": "plasmo dev",
-    "build": "plasmo build"
+    "build": "plasmo build --zip && plasmo build --target=firefox-mv2 --zip",
+    "package": "plasmo package"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
-    "@mantine/core": "^5.8.4",
-    "@mantine/hooks": "^5.8.4",
-    "@plasmohq/storage": "^0.13.0",
-    "@tabler/icons": "^1.114.0",
-    "axios": "^1.2.0",
+    "@mantine/core": "^5.9.4",
+    "@mantine/hooks": "^5.9.4",
+    "@plasmohq/storage": "^0.13.1",
+    "@tabler/icons": "^1.117.0",
+    "axios": "^1.2.1",
     "chance": "^1.1.9",
-    "plasmo": "0.59.1",
+    "plasmo": "0.60.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },

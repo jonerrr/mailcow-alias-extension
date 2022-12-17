@@ -4,10 +4,18 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: PROD
     steps:
-      -
-        name: Browser Platform Publisher
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: Install dependencies and build extension
+        run: pnpm i && pnpm build
+
+      - name: Publish extension
         uses: PlasmoHQ/bpp@v3.1.0
         with:
           keys: ${{ secrets.BPP_KEYS }}
-    
