@@ -4,13 +4,17 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: PROD
     steps:
       - uses: actions/checkout@v3
 
       - uses: pnpm/action-setup@v2
         with:
           version: latest
+
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_FIREFOX_EXT_ID: ${{ secrets.FIREFOX_EXT_ID }}
 
       - name: Install dependencies and build extension
         run: pnpm i && pnpm build
