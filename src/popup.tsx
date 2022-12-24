@@ -14,7 +14,7 @@ export default function IndexPopup() {
     { active: true, windowId: chrome.windows.WINDOW_ID_CURRENT },
     async (t) =>
       // create a sha-256 hash with the URL hostname
-      setSiteHash(await generateHash(new URL(t[0].url).hostname))
+      setSiteHash(generateHash(new URL(t[0].url).hostname))
   );
 
   return (
