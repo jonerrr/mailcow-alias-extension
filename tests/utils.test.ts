@@ -1,7 +1,13 @@
 import "dotenv/config";
 import { describe, expect, it } from "@jest/globals";
 
-import { fetchAliases, generateEmail, generateHash, Settings } from "~utils";
+import {
+	fetchAliases,
+	generateAlias,
+	generateEmail,
+	generateHash,
+	Settings,
+} from "~utils";
 
 describe("util tests", () => {
 	const settings: Settings = {
@@ -24,6 +30,16 @@ describe("util tests", () => {
 
 		expect(
 			email.endsWith(process.env.TEST_ALIAS_DOMAIN!.split("@").pop()),
+		).toBe(true);
+	});
+
+	it("should create an alias", async () => {
+		const alias = await generateAlias(settings, "example.com");
+		console.log(alias);
+		expect(
+			alias.targetAddress.endsWith(
+				process.env.TEST_ALIAS_DOMAIN!.split("@").pop(),
+			),
 		).toBe(true);
 	});
 

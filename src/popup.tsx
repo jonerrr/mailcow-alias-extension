@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MantineProvider, Paper } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
 
-import { Alias, generateHash } from "~utils";
-import AliasTable from "./Components/AliasTable";
+import { Alias, fetchAliases, generateHash } from "~utils";
+import AliasTable from "./Components/AliasTableOld";
 
 export default function IndexPopup() {
   const [siteHash, setSiteHash] = useState<string>();
   const [aliases, setAliases] = useState<Alias[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // fetch the window data of current tab
   chrome.tabs.query(
@@ -16,6 +17,12 @@ export default function IndexPopup() {
       // create a sha-256 hash with the URL hostname
       setSiteHash(generateHash(new URL(t[0].url).hostname))
   );
+
+  // useEffect(() => {
+  //   (async () => {
+  //     setAliases(await fetchAliases())
+  //   })()
+  // }, [])
 
   return (
     <MantineProvider
