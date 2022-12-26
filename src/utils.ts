@@ -1,6 +1,7 @@
 import { default as axios } from "axios";
 import { faker } from "@faker-js/faker";
-import { createHash } from "crypto";
+// import { createHash } from "crypto";
+
 export interface Alias {
 	// id that mailcow assigns alias
 	id: number;
@@ -22,10 +23,10 @@ enum GenerationMethod {
 }
 
 export interface Settings {
-	host: string;
-	apiKey: string;
-	forwardAddress: string;
-	aliasDomain: string;
+	host?: string;
+	apiKey?: string;
+	forwardAddress?: string;
+	aliasDomain?: string;
 	generationMethod: GenerationMethod;
 }
 
@@ -46,7 +47,7 @@ interface FetchAliasData {
 }
 
 export async function generateAlias(
-	settings: Settings,
+	settings: Required<Settings>,
 	hostname?: string,
 ): Promise<Alias> {
 	// first in msg array should be "alias_added", second is the address, third is the id as a string
@@ -86,7 +87,33 @@ export async function generateAlias(
 	};
 }
 
-export async function fetchAliases(settings: Settings): Promise<Alias[]> {
+export async function fetchDomains(
+	settings: Required<Settings>,
+): Promise<string[]> {
+	const { data } = await axios.get<
+		{
+			domain_name: string;
+			aliases_left: number;
+			active: number;
+			active_int: number;
+		}[]
+	>(`${settings.host}/api/v1/get/domain/all`, {
+		headers: {
+			"X-API-Key": settings.apiKey,
+		},
+	});
+
+	return data
+		.filter(
+			(domain) =>
+				domain.active === domain.active_int && domain.aliases_left > 0,
+		)
+		.map((domain) => domain.domain_name);
+}
+
+export async function fetchAliases(
+	settings: Required<Settings>,
+): Promise<Alias[]> {
 	const { data } = await axios.get<FetchAliasData[]>(
 		`${settings.host}/api/v1/get/alias/all`,
 		{
@@ -115,11 +142,24 @@ export async function fetchAliases(settings: Settings): Promise<Alias[]> {
 		});
 }
 
-export function generateHash(data: string) {
-	return createHash("sha256").update(data).digest("hex");
+// export function generateHash(data: string) {
+// 	return createHash("sha256").update(data).digest("hex");
+// }
+
+export async function generateHash(data: string) {
+	return Array.from(
+		new Uint8Array(
+			await crypto.subtle.digest("SHA-256", new TextEncoder().encode(data)),
+		),
+	)
+		.map((bytes) => bytes.toString(16).padStart(2, "0"))
+		.join("");
 }
 
-export function generateEmail(settings: Settings, hostname?: string): string {
+export function generateEmail(
+	settings: Required<Settings>,
+	hostname?: string,
+): string {
 	switch (settings.generationMethod) {
 		case GenerationMethod.RandomCharacters:
 			return `${faker.random.alphaNumeric(10)}@${settings.aliasDomain}`;

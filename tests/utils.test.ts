@@ -18,12 +18,12 @@ describe("util tests", () => {
 		generationMethod: 0,
 	};
 
-	it("should generate a hash for example.com", () => {
-		const hash = generateHash("example.com");
-		expect(hash).toBe(
-			"a379a6f6eeafb9a55e378c118034e2751e682fab9f2d30ab13d2125586ce1947",
-		);
-	});
+	// it("should generate a hash for example.com", () => {
+	// 	const hash = generateHash("example.com");
+	// 	expect(hash).toBe(
+	// 		"a379a6f6eeafb9a55e378c118034e2751e682fab9f2d30ab13d2125586ce1947",
+	// 	);
+	// });
 
 	it("should generate an email for example.com", () => {
 		const email = generateEmail(settings, "example.com");
