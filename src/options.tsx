@@ -134,7 +134,11 @@ export default function IndexOption() {
                 </Text>
               </div>
 
-              <Text c={changesSaved ? "gray.4" : "red.5"}>
+              <Text
+                size="xs"
+                color="dimmed"
+                c={changesSaved ? "gray.4" : "red.8"}
+              >
                 {changesSaved ? "All changes saved" : "Unsaved changes"}
               </Text>
             </Group>
@@ -305,6 +309,21 @@ export default function IndexOption() {
                     })
                   }
                 />
+              </Group>
+
+              <Group
+                position="apart"
+                noWrap
+                spacing="xl"
+                className={classes.collapse}
+              >
+                <div>
+                  <Title order={2}>Example Alias</Title>
+                  {/* <Text size="xs" color="dimmed">
+                    How the alias addresses should be generated
+                  </Text> */}
+                </div>
+                <Text>example@domain.com</Text>
               </Group>
             </Collapse>
 
