@@ -4,10 +4,10 @@ chrome.runtime.onInstalled.addListener(async () => {
 	// set initial settings
 	const storage = new Storage();
 	await storage.set("settings", {
-		host: null,
-		apiKey: null,
-		forwardAddress: null,
-		aliasDomain: null,
+		host: "",
+		apiKey: "",
+		forwardAddress: "",
+		aliasDomain: "",
 		generationMethod: 1,
 	});
 	await storage.set("initialSetup", true);

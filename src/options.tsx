@@ -17,7 +17,6 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { useInterval } from "@mantine/hooks";
 import {
   NotificationsProvider,
   showNotification,
@@ -25,7 +24,7 @@ import {
 import { useStorage } from "@plasmohq/storage/hook";
 import { useEffect, useState } from "react";
 
-import { fetchDomains, Settings } from "~utils";
+import { fetchDomains, generateEmail, Settings } from "~utils";
 
 const useStyles = createStyles((theme) => ({
   item: {
@@ -323,7 +322,9 @@ export default function IndexOption() {
                     How the alias addresses should be generated
                   </Text> */}
                 </div>
-                <Text>example@domain.com</Text>
+                <Text>
+                  {generateEmail(settings as Required<Settings>, "example.com")}
+                </Text>
               </Group>
             </Collapse>
 

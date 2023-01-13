@@ -162,7 +162,7 @@ export function generateEmail(
 ): string {
 	switch (settings.generationMethod) {
 		case GenerationMethod.RandomCharacters:
-			return `${faker.random.alphaNumeric(10)}@${settings.aliasDomain}`;
+			return `${faker.random.alphaNumeric(16)}@${settings.aliasDomain}`;
 		case GenerationMethod.RandomName:
 			return faker.internet.email(
 				faker.name.firstName(),
@@ -170,6 +170,8 @@ export function generateEmail(
 				settings.aliasDomain,
 			);
 		case GenerationMethod.WebsiteURL:
-			return `${hostname}@${settings.aliasDomain}`;
+			return `${hostname.replace(".", "_")}_${faker.random.numeric(3)}@${
+				settings.aliasDomain
+			}`;
 	}
 }
