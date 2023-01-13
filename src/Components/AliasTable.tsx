@@ -50,7 +50,7 @@ export function AliasTable({ aliases, setAliases }: AliasTableProps) {
       offsetScrollbars
     >
       <Table
-        sx={{ maxHeight: 400, maxWidth: 800, isolation: "isolate" }}
+        // sx={{ maxHeight: 400, maxWidth: 800, isolation: "isolate" }}
         verticalSpacing="xs"
       >
         <thead className={cx(classes.header, { [classes.scrolled]: scrolled })}>

@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, SetStateAction } from "react";
 import { useStorage } from "@plasmohq/storage/hook";
 import {
+  Alert,
   Card,
   Group,
+  Loader,
   MantineProvider,
   Paper,
   Skeleton,
@@ -12,7 +14,8 @@ import {
 import { NotificationsProvider } from "@mantine/notifications";
 
 import { Alias, fetchAliases, generateHash, Settings } from "~utils";
-import AliasTable from "./Components/AliasTableOld";
+import { AliasTable } from "~Components/AliasTable";
+import { IconAlertCircle } from "@tabler/icons";
 
 export default function IndexPopup() {
   const [siteHash, setSiteHash] = useState<string>();
@@ -52,8 +55,41 @@ export default function IndexPopup() {
       theme={{ colorScheme: "dark" }}
     >
       <NotificationsProvider>
-        <Paper shadow="xl" radius="md" p="xl" m="lg" withBorder>
-          <Text>hello</Text>
+        <Paper
+          shadow="xl"
+          radius="md"
+          p="lg"
+          m="lg"
+          withBorder
+          sx={{ minWidth: "700px", minHeight: "400px" }}
+        >
+          <Skeleton
+            visible={settings === "loading"}
+            sx={{ minWidth: "700px", minHeight: "400px" }}
+          >
+            {configured ? (
+              <AliasTable aliases={aliases} setAliases={setAliases} />
+            ) : (
+              <Alert
+                icon={<IconAlertCircle size={16} />}
+                title="Warning"
+                color="yellow"
+                radius="md"
+              >
+                Initial setup is missing to begin using this extension. Please
+                visit the options page and configure your Mailcow instance.
+              </Alert>
+            )}
+            {/* <Alert
+              icon={<IconAlertCircle size={16} />}
+              title="Warning"
+              color="yellow"
+              radius="md"
+            >
+              Initial setup is missing to begin using this extension. Please
+              visit the options page and configure your Mailcow instance.
+            </Alert> */}
+          </Skeleton>
         </Paper>
       </NotificationsProvider>
     </MantineProvider>
