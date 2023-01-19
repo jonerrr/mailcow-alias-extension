@@ -142,6 +142,25 @@ export async function fetchAliases(
 		});
 }
 
+export async function updateAlias(
+	id: number,
+	settings: Settings,
+	active: 0 | 1,
+): Promise<boolean> {
+	const { data } = await axios.post(
+		`${settings.host}/api/v1/edit/alias/${id}`,
+		{
+			attr: { active, items: [id] },
+		},
+		{
+			headers: {
+				"X-API-Key": settings.apiKey,
+			},
+		},
+	);
+	return data[0].type === "success";
+}
+
 // export function generateHash(data: string) {
 // 	return createHash("sha256").update(data).digest("hex");
 // }

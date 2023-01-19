@@ -324,6 +324,7 @@ export default function IndexOption() {
                 </div>
                 <Text>
                   {generateEmail(settings as Required<Settings>, "example.com")}
+                  {(settings as Settings).aliasDomain ?? "example.tld"}
                 </Text>
               </Group>
             </Collapse>

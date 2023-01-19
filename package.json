@@ -21,6 +21,7 @@
     "@tabler/icons": "^1.118.0",
     "axios": "^1.2.1",
     "chance": "^1.1.9",
+    "dayjs": "^1.11.7",
     "plasmo": "0.60.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"

@@ -8,7 +8,7 @@ import {
 } from "@mantine/core";
 import { IconSettings } from "@tabler/icons";
 
-import type { Alias } from "~utils";
+import type { Alias, Settings } from "~utils";
 import { AliasRow } from "./AliasRow";
 
 const useStyles = createStyles((theme) => ({
@@ -34,11 +34,12 @@ const useStyles = createStyles((theme) => ({
 }));
 
 interface AliasTableProps {
+  settings: Settings;
   aliases: Alias[];
   setAliases: Dispatch<SetStateAction<Alias[]>>;
 }
 
-export function AliasTable({ aliases, setAliases }: AliasTableProps) {
+export function AliasTable({ settings, aliases, setAliases }: AliasTableProps) {
   const [scrolled, setScrolled] = useState(false);
 
   const { classes, cx } = useStyles();
@@ -71,7 +72,11 @@ export function AliasTable({ aliases, setAliases }: AliasTableProps) {
           {aliases
             .sort((a, b) => b.created.getTime() - a.created.getTime())
             .map((alias) => (
-              <AliasRow alias={alias} setAliases={setAliases} />
+              <AliasRow
+                settings={settings}
+                alias={alias}
+                setAliases={setAliases}
+              />
             ))}
         </tbody>
       </Table>

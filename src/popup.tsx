@@ -20,6 +20,7 @@ import { IconAlertCircle } from "@tabler/icons";
 export default function IndexPopup() {
   const [siteHash, setSiteHash] = useState<string>();
   const [aliases, setAliases] = useState<Alias[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // initialize as loading and then set to the actual value
   const [settings] = useStorage<Settings | "loading">("settings", "loading");
@@ -44,7 +45,21 @@ export default function IndexPopup() {
 
     (async () => {
       console.log(settings);
+      await new Promise((r) => setTimeout(r, 1000));
+      setAliases([
+        {
+          id: 1,
+          domain: "example.tkd",
+          targetAddress: "test@example.tld",
+          address: "person@example.tld",
+          active: true,
+          created: new Date("December 17, 2022 03:24:00"),
+          modified: new Date("January 15, 2023 10:24:00"),
+          siteHash: siteHash,
+        },
+      ]);
       // setAliases(await fetchAliases(settings));
+      setLoading(false);
     })();
   }, [configured]);
 
@@ -64,11 +79,15 @@ export default function IndexPopup() {
           sx={{ minWidth: "700px", minHeight: "400px" }}
         >
           <Skeleton
-            visible={settings === "loading"}
+            visible={settings === "loading" || loading}
             sx={{ minWidth: "700px", minHeight: "400px" }}
           >
             {configured ? (
-              <AliasTable aliases={aliases} setAliases={setAliases} />
+              <AliasTable
+                settings={settings}
+                aliases={aliases}
+                setAliases={setAliases}
+              />
             ) : (
               <Alert
                 icon={<IconAlertCircle size={16} />}
@@ -80,15 +99,6 @@ export default function IndexPopup() {
                 visit the options page and configure your Mailcow instance.
               </Alert>
             )}
-            {/* <Alert
-              icon={<IconAlertCircle size={16} />}
-              title="Warning"
-              color="yellow"
-              radius="md"
-            >
-              Initial setup is missing to begin using this extension. Please
-              visit the options page and configure your Mailcow instance.
-            </Alert> */}
           </Skeleton>
         </Paper>
       </NotificationsProvider>
