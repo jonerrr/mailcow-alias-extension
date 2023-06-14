@@ -318,13 +318,9 @@ export default function IndexOption() {
               >
                 <div>
                   <Title order={2}>Example Alias</Title>
-                  {/* <Text size="xs" color="dimmed">
-                    How the alias addresses should be generated
-                  </Text> */}
                 </div>
                 <Text>
                   {generateEmail(settings as Required<Settings>, "example.com")}
-                  {(settings as Settings).aliasDomain ?? "example.tld"}
                 </Text>
               </Group>
             </Collapse>

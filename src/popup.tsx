@@ -41,26 +41,25 @@ export default function IndexPopup() {
     settings.aliasDomain;
 
   useEffect(() => {
-    if (!configured) return;
-
-    (async () => {
-      console.log(settings);
-      await new Promise((r) => setTimeout(r, 1000));
-      setAliases([
-        {
-          id: 1,
-          domain: "example.tkd",
-          targetAddress: "test@example.tld",
-          address: "person@example.tld",
-          active: true,
-          created: new Date("December 17, 2022 03:24:00"),
-          modified: new Date("January 15, 2023 10:24:00"),
-          siteHash: siteHash,
-        },
-      ]);
-      // setAliases(await fetchAliases(settings));
-      setLoading(false);
-    })();
+    if (configured)
+      (async () => {
+        console.log(settings);
+        await new Promise((r) => setTimeout(r, 1000));
+        setAliases([
+          {
+            id: 1,
+            domain: "example.tkd",
+            targetAddress: "test@example.tld",
+            address: "person@example.tld",
+            active: true,
+            created: new Date("December 17, 2022 03:24:00"),
+            modified: new Date("January 15, 2023 10:24:00"),
+            siteHash: siteHash,
+          },
+        ]);
+        // setAliases(await fetchAliases(settings));
+      })();
+    setLoading(false);
   }, [configured]);
 
   return (
@@ -96,7 +95,11 @@ export default function IndexPopup() {
                 radius="md"
               >
                 Initial setup is missing to begin using this extension. Please
-                visit the options page and configure your Mailcow instance.
+                visit the{" "}
+                <a href="/options.html" target="_blank">
+                  options
+                </a>{" "}
+                page and configure your Mailcow instance.
               </Alert>
             )}
           </Skeleton>
