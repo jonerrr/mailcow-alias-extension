@@ -10,7 +10,7 @@ A Chrome & Firefox extension for creating aliases using mailcow's API.
 
 ## Usage
 
-Visit the extension options and complete initial setup. You can then use the extension to create aliases by clicking the extension icon.
+Visit the extension options and complete initial setup. You can create aliases by right clicking on any page and selecting "Generate Alias". This will copy the email to your clipboard. You can then view all your generated aliases (only by this extension) in the extension popup.
 
 ## Build Requirements
 
