@@ -1,16 +1,17 @@
 # Mailcow Alias Generator
 
-A Chrome & Firefox extension for creating aliases using mailcow's API.
+A Chrome & Firefox extension for creating aliases using Mailcow's API.
 
 ## Installation
 
-[Chrome Web Store](https://chrome.google.com/webstore/detail/mailcow-aliases/iodaelineglpblekpapnngdfoohkaedg)
+[Chrome Web Store](https://chrome.google.com/webstore/detail/mailcow-aliases/iodaelineglpblekpapnngdfoohkaedg) 
+The version published to the Chrome Web Store is outdated because MV3 is not supported (yet), you will need to build and install the extension locally if you want the latest version on chrome.
 
 [Firefox Add-Ons](https://addons.mozilla.org/en-US/firefox/addon/mailcow-aliases/)
 
 ## Usage
 
-Visit the extension options and complete initial setup. You can create aliases by right clicking on any page and selecting "Generate Alias". This will copy the email to your clipboard. You can then view all your generated aliases (only by this extension) in the extension popup.
+Visit the extension options and complete the initial setup. You can create aliases by right-clicking on any page and selecting "Generate Alias". This will copy the email to your clipboard. In the extension popup, you can then view all your generated aliases (only by this extension).
 
 ## Build Requirements
 
