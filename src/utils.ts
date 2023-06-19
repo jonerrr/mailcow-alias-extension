@@ -1,5 +1,4 @@
-import { faker } from "@faker-js/faker"
-import { default as axios } from "axios"
+import { randAlphaNumeric, randEmail } from "@ngneat/falso"
 
 // import { createHash } from "crypto";
 
@@ -229,14 +228,13 @@ export function generateEmail(
 ): string {
   switch (settings.generationMethod) {
     case GenerationMethod.RandomCharacters:
-      return `${faker.string.alphanumeric(16)}@${settings.aliasDomain}`
+      return `${randAlphaNumeric({ length: 16 }).join("")}@${
+        settings.aliasDomain
+      }`
 
     case GenerationMethod.RandomName:
-      return faker.internet.email({
-        firstName: faker.person.firstName(),
-        lastName: faker.person.lastName(),
-        provider: settings.aliasDomain
-      })
+      const domain = settings.aliasDomain.split(".")
+      return randEmail({ provider: domain[0], suffix: domain[1] })
 
     // case GenerationMethod.WebsiteURL:
     //   return `${hostname.replace(".", "_")}_${faker.random.numeric(3)}@${
