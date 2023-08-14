@@ -14,7 +14,7 @@ export interface Alias {
   address: string
   active: boolean
   created: number
-  modified: Date
+  // modified: Date
   // hash of site
   siteHash: string
 }
@@ -29,7 +29,7 @@ export interface Settings {
   host?: string
   apiKey?: string
   forwardAddress?: string
-  aliasDomain?: string
+  aliasDomain: string | null
   generationMethod: GenerationMethod
 }
 
@@ -94,7 +94,7 @@ export async function fetchAliases(
     )
     .map((alias) => {
       // format: prefix, version, hash, timestamp
-      const info = alias.private_comment.split("_")
+      const info = alias.private_comment!.split("_")
 
       return {
         id: alias.id,
@@ -103,8 +103,7 @@ export async function fetchAliases(
         address: alias.address,
         active: alias.active === 1,
         created: parseInt(info[3]),
-        //unused
-        modified: alias.modified ? new Date(`${alias.modified}.000Z`) : null,
+        // modified: alias.modified ? new Date(`${alias.modified}.000Z`) : null,
         siteHash: info[2]
       }
     })
@@ -115,7 +114,7 @@ export async function generateAlias(
   hostname?: string
 ): Promise<Alias> {
   const address = generateEmail(settings, hostname)
-  const hash = await generateHash(hostname)
+  const hash = await generateHash(hostname ?? "no")
   // although mailcow has its own date, the format they use sucks
   const createdAt = Date.now()
 
@@ -147,13 +146,13 @@ export async function generateAlias(
 
   return {
     id: parseInt(data[0].msg[2]),
-    domain: settings.aliasDomain,
+    domain: settings.aliasDomain!,
     targetAddress: settings.apiKey,
     address,
     active: true,
     // mailcow returns dates in weird format so not using them (https://github.com/mailcow/mailcow-dockerized/issues/4876)
     created: createdAt,
-    modified: null,
+    // modified: null,
     siteHash: hash
   }
 }
@@ -170,7 +169,7 @@ export async function updateAlias(
     await fetch(`${settings.host}/api/v1/edit/alias/${id}`, {
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": settings.apiKey
+        "X-API-Key": settings.apiKey!
       },
       method: "POST",
       body: JSON.stringify({
@@ -196,7 +195,7 @@ export async function deleteAlias(
     await fetch(`${settings.host}/api/v1/delete/alias`, {
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": settings.apiKey
+        "X-API-Key": settings.apiKey!
       },
       method: "POST",
       body: JSON.stringify([id]),
@@ -233,7 +232,7 @@ export function generateEmail(
       }`
 
     case GenerationMethod.RandomName:
-      const domain = settings.aliasDomain.split(".")
+      const domain = settings.aliasDomain.split(".") ?? "example.com"
       return randEmail({ provider: domain[0], suffix: domain[1] })
 
     // case GenerationMethod.WebsiteURL:

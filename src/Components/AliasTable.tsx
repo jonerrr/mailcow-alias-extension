@@ -44,13 +44,14 @@ export function AliasTable({ settings, aliases, setAliases }: AliasTableProps) {
   const [scrolled, setScrolled] = useState(false)
 
   const { classes, cx } = useStyles()
+  //TODO fix loading
   return (
     <ScrollArea
       sx={{ height: 300 }}
       onScrollPositionChange={({ y }) => setScrolled(y !== 0)}
       offsetScrollbars>
       <Table
-        // sx={{ maxHeight: 400, maxWidth: 800, isolation: "isolate" }}
+        sx={{ maxHeight: 400, maxWidth: 800, isolation: "isolate" }}
         verticalSpacing="xs">
         <thead className={cx(classes.header, { [classes.scrolled]: scrolled })}>
           <tr>

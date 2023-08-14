@@ -17,7 +17,7 @@ import { notifications } from "@mantine/notifications"
 import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
-
+import { Storage } from "@plasmohq/storage"
 import { ThemeProvider } from "~theme"
 import { type Settings, fetchDomains, generateEmail } from "~utils"
 
@@ -43,6 +43,7 @@ export default function IndexOptions() {
     "settings",
     "loading"
   )
+  console.log(settings)
   const [initialSetup, setInitialSetup] = useStorage<boolean>(
     "initialSetup",
     false
@@ -52,10 +53,19 @@ export default function IndexOptions() {
 
   // for temporary storage of config values. once they are valid, they are saved in storage
   const [host, setHost] = useState("")
+  //TODO store apikey securely (maybe have an option for using the SecureStorage API and setting a password)
   const [apiKey, setApiKey] = useState("")
   const [forwardAddress, setForwardAddress] = useState("")
 
   const [domains, setDomains] = useState<string[]>([])
+
+  const storage = new Storage()
+
+  storage.watch({
+    settings: (s) => {
+      console.log(s.newValue)
+    }
+  })
 
   useEffect(() => {
     // load settings from storage only after they have loaded

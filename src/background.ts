@@ -18,14 +18,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   chrome.runtime.openOptionsPage()
 })
 
-function copyToClipboard(text: string) {
-  const el = document.createElement("textarea")
-  el.value = text
-  document.body.appendChild(el)
-  el.select()
-  document.execCommand("copy")
-  document.body.removeChild(el)
-}
+
 
 // this adds a menu item when you right click
 chrome.contextMenus.create({
@@ -33,6 +26,7 @@ chrome.contextMenus.create({
   id: "generateAlias",
   contexts: ["all"]
 })
+
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "generateAlias") {
@@ -52,7 +46,41 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
 
     const alias = await generateAlias(settings as Required<Settings>)
-    copyToClipboard(alias.address)
+    // copyToClipboard(alias.address)
+
+    // once service workers support the clipboard api, we won't have to do this offscreen document stuff
+
+    // if (!(await chrome.offscreen.hasDocument())) {
+    //   await chrome.offscreen.createDocument({
+    //     url: OFFSCREEN_DOCUMENT_PATH,
+    //     reasons: [chrome.offscreen.Reason.CLIPBOARD],
+    //     justification: "Writing text to clipboard"
+    //   })
+    // }
+
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, 
+          {
+              message: "copyText",
+              textToCopy: alias.address
+          }, function(response) {})
+  })
+  
+
+    // chrome.runtime.sendMessage({
+    //   type: "copy-data-to-clipboard",
+    //   target: "offscreen-doc",
+    //   data: alias.address
+    // })
+
+    // const resp = await sendToBackground({
+    //   name: "clipboard",
+    //   body: {
+    //     alias
+    //   }
+    // })
+
+    // console.log(resp)
 
     //TODO add some loading and error handling and a notification when complete
   }

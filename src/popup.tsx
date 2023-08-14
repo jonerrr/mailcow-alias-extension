@@ -1,15 +1,5 @@
-import {
-  Alert,
-  Card,
-  Group,
-  Loader,
-  MantineProvider,
-  Paper,
-  Skeleton,
-  Switch,
-  Text
-} from "@mantine/core"
-import { type SetStateAction, useEffect, useState } from "react"
+import { Alert, Skeleton } from "@mantine/core"
+import { useEffect, useState } from "react"
 import { AlertCircle } from "tabler-icons-react"
 
 import { useStorage } from "@plasmohq/storage/hook"
@@ -31,7 +21,7 @@ export default function IndexPopup() {
     { active: true, windowId: chrome.windows.WINDOW_ID_CURRENT },
     async (t) =>
       // create a sha-256 hash with the URL hostname
-      setSiteHash(await generateHash(new URL(t[0].url).hostname))
+      setSiteHash(await generateHash(new URL(t[0].url!).hostname))
   )
 
   const configured =
@@ -46,20 +36,9 @@ export default function IndexPopup() {
       setLoading(false)
       return
     }
+
     ;(async () => {
       await new Promise((r) => setTimeout(r, 1000))
-      // setAliases([
-      //   {
-      //     id: 1,
-      //     domain: "example.tkd",
-      //     targetAddress: "test@example.tld",
-      //     address: "person@example.tld",
-      //     active: true,
-      //     created: Date.now(),
-      //     modified: new Date("January 15, 2023 10:24:00"),
-      //     siteHash: siteHash,
-      //   },
-      // ]);
       setAliases(await fetchAliases(settings as Required<Settings>))
       setLoading(false)
     })()
@@ -67,17 +46,9 @@ export default function IndexPopup() {
 
   return (
     <ThemeProvider>
-      {/* <Paper
-          shadow="xl"
-          radius="md"
-          p="lg"
-          m="lg"
-          withBorder
-          sx={{ minWidth: "700px", minHeight: "400px" }}
-        > */}
       <Skeleton
         visible={settings === "loading" || loading}
-        sx={{ minWidth: "700px", minHeight: "400px" }}>
+        sx={{ minWidth: "600px", minHeight: "300px" }}>
         {configured ? (
           <AliasTable
             settings={settings}
@@ -88,8 +59,7 @@ export default function IndexPopup() {
           <Alert
             icon={<AlertCircle size={16} />}
             title="Warning"
-            color="yellow"
-            radius="md">
+            color="yellow">
             Initial setup is missing to begin using this extension. Please visit
             the{" "}
             <a href="/options.html" target="_blank">
@@ -99,7 +69,6 @@ export default function IndexPopup() {
           </Alert>
         )}
       </Skeleton>
-      {/* </Paper> */}
     </ThemeProvider>
   )
 }
