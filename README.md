@@ -2,12 +2,9 @@
 
 A Chrome & Firefox extension for creating aliases using Mailcow's API.
 
-## Installation
+[Chromium-based browsers install](https://chrome.google.com/webstore/detail/mailcow-aliases/iodaelineglpblekpapnngdfoohkaedg) 
 
-[Chrome Web Store](https://chrome.google.com/webstore/detail/mailcow-aliases/iodaelineglpblekpapnngdfoohkaedg) 
-The version published to the Chrome Web Store is outdated because MV3 is not supported (yet), you will need to build and install the extension locally if you want the latest version on chrome.
-
-[Firefox Add-Ons](https://addons.mozilla.org/en-US/firefox/addon/mailcow-aliases/)
+[Firefox install](https://addons.mozilla.org/en-US/firefox/addon/mailcow-aliases/)
 
 ## Usage
 
