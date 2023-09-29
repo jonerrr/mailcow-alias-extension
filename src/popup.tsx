@@ -1,9 +1,7 @@
 import { Alert, Skeleton } from "@mantine/core"
 import { useEffect, useState } from "react"
 import { AlertCircle } from "tabler-icons-react"
-
 import { useStorage } from "@plasmohq/storage/hook"
-
 import { AliasTable } from "~Components/AliasTable"
 import { ThemeProvider } from "~theme"
 import { type Alias, type Settings, fetchAliases, generateHash } from "~utils"

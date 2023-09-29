@@ -12,7 +12,7 @@ Visit the extension options and complete the initial setup. You can create alias
 
 ## Build Requirements
 
-- NodeJS 16.x or later
+- NodeJS 18.x or later
 - pnpm
 - A browser that supports Chrome or Firefox extensions
 
