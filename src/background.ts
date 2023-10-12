@@ -2,14 +2,11 @@ import { Storage } from "@plasmohq/storage"
 
 import { type Settings, generateAlias } from "~utils"
 
-chrome.runtime.onInstalled.addListener(async () => {
+chrome.runtime.onInstalled.addListener(async (details) => {
+  if (details.reason !== "install") return
+
   // set initial settings
   const storage = new Storage()
-
-  const isSetup = await storage.get("initialSetup")
-  if (isSetup) {
-    return
-  }
 
   await storage.set("settings", {
     host: "",
