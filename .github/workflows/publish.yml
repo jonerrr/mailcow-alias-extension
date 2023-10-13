@@ -19,9 +19,13 @@ jobs:
       - name: Install dependencies and build extension
         run: pnpm i && pnpm build --zip && pnpm build --target=firefox-mv2 --zip
 
-      - name: Publish extension
+      - name: Publish Chrome extension
         uses: PlasmoHQ/bpp@v3.1.0
         with:
-          keys: ${{ secrets.BPP_KEYS }}
-          firefox-file: build/firefox-mv2-prod.zip
-          chrome-file: build/chrome-mv3-prod.zip
+          keys: ${{ secrets.BPP_KEYS_CHROME }}
+          artifact: build/chrome-mv3-prod.zip
+      - name: Publish Firefox extension
+        uses: PlasmoHQ/bpp@v3.1.0
+        with:
+          keys: ${{ secrets.BPP_KEYS_FIREFOX }}
+          artifact: build/firefox-mv2-prod.zip
