@@ -17,7 +17,7 @@ jobs:
           envkey_FIREFOX_EXT_ID: ${{ secrets.FIREFOX_EXT_ID }}
 
       - name: Install dependencies and build extension
-        run: pnpm i && pnpm build
+        run: pnpm i && pnpm package && pnpm package --target=firefox-mv2
 
       - name: Publish extension
         uses: PlasmoHQ/bpp@v3.1.0
