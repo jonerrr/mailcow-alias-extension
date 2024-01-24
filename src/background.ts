@@ -45,7 +45,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       return
     }
 
-    const alias = await generateAlias(settings as Required<Settings>)
+    const hostname = new URL(tab!.url!).hostname
+
+    const alias = await generateAlias(settings as Required<Settings>, hostname)
 
     // once service workers support the clipboard api, we won't have to do this messaging stuff
 
@@ -56,10 +58,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
           message: "copyText",
           textToCopy: alias.address
         },
-        function (response) {}
+        function (response) { }
       )
     })
   }
 })
 
-export {}
+export { }
