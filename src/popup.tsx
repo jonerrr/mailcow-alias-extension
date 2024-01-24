@@ -7,6 +7,7 @@ import { ThemeProvider } from "~theme"
 import { type Alias, type Settings, fetchAliases, generateHash } from "~utils"
 
 export default function IndexPopup() {
+  //TODO: rename because its no longer a hash
   const [siteHash, setSiteHash] = useState<string>()
   const [aliases, setAliases] = useState<Alias[]>([])
   const [loading, setLoading] = useState(true)
@@ -18,8 +19,8 @@ export default function IndexPopup() {
   chrome.tabs.query(
     { active: true, windowId: chrome.windows.WINDOW_ID_CURRENT },
     async (t) =>
-      // create a sha-256 hash with the URL hostname
-      setSiteHash(await generateHash(new URL(t[0].url!).hostname))
+
+      setSiteHash(new URL(t[0].url!).hostname)
   )
 
   const configured =
@@ -35,7 +36,7 @@ export default function IndexPopup() {
       return
     }
 
-    ;(async () => {
+    ; (async () => {
       await new Promise((r) => setTimeout(r, 1000))
       setAliases(await fetchAliases(settings as Required<Settings>))
       setLoading(false)
